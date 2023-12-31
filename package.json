@@ -1,0 +1,23 @@
+{
+    "name": "strava-activity-archive",
+    "description": "a strava archiving solution for all activities",
+    "author": "greg tracy",
+    "version": "0.0.1",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gtracy/strava-activity-archive.git"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gtracy/strava-activity-archive/issues"
+    },
+    "homepage": "https://github.com/gtracy/strava-activity-archive#readme",
+    "dependencies": {
+        "express": "^4.18.2",
+        "logme": "0.3.8",
+        "morgan": "^1.10.0"
+    }
+}
