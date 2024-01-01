@@ -1,3 +1,4 @@
+const dotenv = require('dotenv-json')();
 var logme = require('logme');
 var fs = require('fs');
 var path = require('path');
@@ -10,7 +11,12 @@ module.exports = function(app) {
     app.get('/webhook', (req, res) => {
         // Strava will send a 'hub.challenge' parameter for verification
         const challenge = req.query['hub.challenge'];
-        res.status(200).json({ 'hub.challenge': challenge });
+        const verify_token = req.query['hub.verify_token'];
+        if( verify_token !== process.env.STRAVA_VERIFY_TOKEN ) {
+          res.status(400).send('Invalid signature');
+        } else {
+          res.status(200).json({ 'hub.challenge': challenge });
+        }
     });
     
     app.post('/webhook', (req, res) => {
@@ -18,9 +24,11 @@ module.exports = function(app) {
         console.dir(req.headers);
         try {
           // Verify the request signature (replace with your actual verification logic)
-        //   if (!verifySignature(req.headers['x-strava-signature'], req.body)) {
-        //     return res.status(400).send('Invalid signature');
-        //   }
+          const parsedSubscriptionID = parseInt(process.env.STRAVA_SUBSCRIPTION_ID);
+          if (req.body.subscription_id !== parsedSubscriptionID) {
+            logme.error('failed to validate the webhook request '+req.body.subscription_id+' against configuration '+process.env.STRAVA_SUBSCRIPTION_ID);
+            return res.status(400).send('Invalid signature');
+          }
       
           // Process the webhook data
           console.log('Received webhook:', req.body);

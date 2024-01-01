@@ -4,10 +4,11 @@
 
 # Assign command line arguments to variables
 URL=$1
+SUB_ID=$2
 
 # Check if all arguments are provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <webhook url>"
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <webhook url> <subscription id>"
     exit 1
 fi
 
@@ -19,7 +20,7 @@ JSON_PAYLOAD=$(cat <<EOF
   "object_id": "object-id",
   "object_type": "activity",
   "owner_id": "owner-id",
-  "subscription_id": "subscription-id"
+  "subscription_id": $SUB_ID
 }
 EOF
 )
