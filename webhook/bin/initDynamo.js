@@ -1,38 +1,17 @@
-const dotenv = require('dotenv-json')();
-const { v4: uuidv4 } = require('uuid');
+const dotenv = require('dotenv-json')({ path:'../.env.json' });
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const { CreateTableCommand } = require("@aws-sdk/client-dynamodb");
 
-const config = require('./config');
+const config = require('../../config');
 console.dir(config.getAWSConfig());
 
-async function dynamoPutObject(item) {
-    // Initialize the DynamoDB client
-    const client = new DynamoDBClient(config.getAWSConfig());
-    const docClient = DynamoDBDocumentClient.from(client);
 
-    try {
-        // add-on a unique identifier for the record
-        item.Item['archive_id'] = uuidv4();
-
-        // Insert the item into the DynamoDB table
-        const data = await docClient.send(new PutCommand(item));
-        console.log("Item inserted successfully:", data);
-        return true;
-    } catch (error) {
-        console.error("Error inserting item into DynamoDB:", error);
-        return false;
-    }
-};
-
-
-async function createTableWithGSI() {
+async function createRawWebhookTable(table_name) {
     const client = new DynamoDBClient(config.getAWSConfig());
 
     const params = {
-        TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
+        TableName: table_name,
         KeySchema: [
             { AttributeName: "owner_id", KeyType: "HASH" },  // Partition key
             { AttributeName: "archive_id", KeyType: "RANGE" }  // Sort key
@@ -73,4 +52,7 @@ async function createTableWithGSI() {
     }
 }
 
-module.exports = {dynamoPutObject, createTableWithGSI};
+(async () => {
+    createRawWebhookTable(process.env.DYNAMO_RAW_WEBHOOK_TABLE);
+})();
+
