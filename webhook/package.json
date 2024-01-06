@@ -1,8 +1,8 @@
 {
     "name": "strava-activity-archive",
-    "description": "a strava archiving solution for all activities",
+    "description": "a strava activity webhook",
     "author": "greg tracy",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "init": "node bin/initDynamo.js"
