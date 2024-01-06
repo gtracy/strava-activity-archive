@@ -1,6 +1,7 @@
 const dotenv = require('dotenv-json')();
 const logme = require('logme');
-const dynamoPutObject = require('../dynamo');
+
+const {dynamoPutObject} = require('../dynamo');
 
 module.exports = function(app) {
 
