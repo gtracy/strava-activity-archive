@@ -1,7 +1,6 @@
 const dotenv = require('dotenv-json')();
-var logme = require('logme');
-var fs = require('fs');
-var path = require('path');
+const logme = require('logme');
+const dynamoPutObject = require('../dynamo');
 
 module.exports = function(app) {
 
@@ -19,9 +18,21 @@ module.exports = function(app) {
         }
     });
     
-    app.post('/webhook', (req, res) => {
-        console.dir(req.body);
-        console.dir(req.headers);
+    // validate the request and go straight to Dynamo with the object
+    // 
+    // {
+    //   aspect_type: 'create',
+    //   event_time: 1704129726,
+    //   object_id: 10474819548,
+    //   object_type: 'activity',
+    //   owner_id: 6866927,
+    //   subscription_id: 253557,
+    //   updates: {}
+    // }
+    //
+    app.post('/webhook', async (req, res) => {
+        logme.debug(JSON.stringify(req.body));
+        logme.debug(JSON.stringify(req.headers));
         try {
           // Verify the request signature (replace with your actual verification logic)
           const parsedSubscriptionID = parseInt(process.env.STRAVA_SUBSCRIPTION_ID);
@@ -31,14 +42,18 @@ module.exports = function(app) {
           }
       
           // Process the webhook data
-          console.log('Received webhook:', req.body);
-      
-          // TODO: Implement your webhook logic here, such as:
-          // - Sending notifications
-          // - Updating databases
-          // - Triggering other actions
-      
-          res.status(200).send('Webhook processed successfully');
+          const item = {
+            TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
+            Item: req.body
+                // owner_id: Partition key
+                // object_id: Sort key
+          };
+          const success = await dynamoPutObject(item);
+          if( success ) {
+            res.status(200).send('Webhook processed successfully');
+          } else {
+            res.status(500).send('Internal server error');
+          }
         } catch (error) {
           console.error('Error processing webhook:', error);
           res.status(500).send('Internal server error');
