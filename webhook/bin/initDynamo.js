@@ -19,14 +19,15 @@ async function createRawWebhookTable(table_name) {
         AttributeDefinitions: [
             { AttributeName: "owner_id", AttributeType: "S" },
             { AttributeName: "archive_id", AttributeType: "S" },
-            { AttributeName: "event_time", AttributeType: "N" } // Additional attribute for GSI
+            { AttributeName: "event_time", AttributeType: "N" }, // Additional attribute for GSI
+            { AttributeName: "object_id", AttributeType: "S" } // Additional attribute for GSI
         ],
         GlobalSecondaryIndexes: [
             {
                 IndexName: "EventTimeIndex",
                 KeySchema: [
-                    { AttributeName: "event_time", KeyType: "HASH" }  // GSI Partition key
-                    // Optionally add a sort key here
+                    { AttributeName: "object_id", KeyType: "HASH" },  // GSI Partition key
+                    { AttributeName: "event_time", KeyType: "RANGE"}
                 ],
                 Projection: {
                     ProjectionType: "ALL" // You can choose KEYS_ONLY, INCLUDE, or ALL

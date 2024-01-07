@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
-const { CreateTableCommand } = require("@aws-sdk/client-dynamodb");
 
 const config = require('../config');
 console.dir(config.getAWSConfig());
