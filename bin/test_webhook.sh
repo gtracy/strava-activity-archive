@@ -17,9 +17,9 @@ JSON_PAYLOAD=$(cat <<EOF
 {
   "aspect_type": "create",
   "event_time": 1549560669,
-  "object_id": "object-id",
+  "object_id": "398209",
   "object_type": "activity",
-  "owner_id": "owner-id",
+  "owner_id": "greg_tracy",
   "subscription_id": $SUB_ID
 }
 EOF

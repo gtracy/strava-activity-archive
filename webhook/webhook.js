@@ -18,6 +18,7 @@ async function dynamoPutObject(item) {
   try {
       // add-on a unique identifier for the record
       item.Item['archive_id'] = uuidv4();
+      item.Item['fetched'] = "false";
 
       // Insert the item into the DynamoDB table
       const data = await docClient.send(new PutCommand(item));
