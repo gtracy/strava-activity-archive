@@ -1,0 +1,25 @@
+{
+    "name": "strava-activity-archive",
+    "description": "a lambda job that inspects new webhook events",
+    "author": "greg tracy",
+    "version": "0.1.0",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gtracy/strava-activity-archive.git"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gtracy/strava-activity-archive/issues"
+    },
+    "homepage": "https://github.com/gtracy/strava-activity-archive#readme",
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.485.0",
+        "@aws-sdk/client-sqs": "^3.485.0",
+        "@aws-sdk/lib-dynamodb": "^3.485.0",
+        "dotenv-json": "^1.0.0",
+        "logme": "0.3.8"
+    }
+}
