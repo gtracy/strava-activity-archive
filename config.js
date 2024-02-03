@@ -24,8 +24,8 @@ module.exports = {
         });
     },
 
-    getAWSConfig : function getAWSConfig() {
-        if( process.env.NODE_ENV === 'prod' ) {
+    getAWSConfig : function getAWSConfig(sqs) {
+        if( process.env.NODE_ENV === 'prod' || sqs ) {
             return {
                 region : process.env.AWS_REGION,
                 access_id : process.env.AWS_ACCESS_ID,
@@ -37,5 +37,15 @@ module.exports = {
             }
         }
     },
+
+    getSQSConfig : function getSQSConfig() {
+        // we always use cloud queues (nothing local) but there
+        // are different queues for prod and test
+        if( process.env.NODE_ENV === 'prod' ) {
+            return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_PROD;
+        } else {
+            return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_TEST;
+        }
+    }
 
 }
