@@ -19,10 +19,12 @@ async function dynamoPutObject(item) {
       // add-on a unique identifier for the record
       item.Item['archive_id'] = uuidv4();
       item.Item['fetched'] = "false";
+      logme.debug('insert new webhook object');
+      logme.debug(JSON.stringify(item, null, 2));
 
       // Insert the item into the DynamoDB table
       const data = await docClient.send(new PutCommand(item));
-      console.log("Item inserted successfully:", data);
+      logme.debug("Item inserted successfully:");
       return true;
   } catch (error) {
       console.error("Error inserting item into DynamoDB:", error);
@@ -40,6 +42,8 @@ module.exports = function(app) {
         const challenge = req.query['hub.challenge'];
         const verify_token = req.query['hub.verify_token'];
         if( verify_token !== process.env.STRAVA_VERIFY_TOKEN ) {
+          logme.error('Failed to validate request signature');
+          logme.error('challenge: '+ challenge + ' / verify_token: '+verify_token);
           res.status(400).send('Invalid signature');
         } else {
           res.status(200).json({ 'hub.challenge': challenge });
@@ -73,8 +77,6 @@ module.exports = function(app) {
           const item = {
             TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
             Item: req.body
-                // owner_id: Partition key
-                // object_id: Sort key
           };
           const success = await dynamoPutObject(item);
           if( success ) {
