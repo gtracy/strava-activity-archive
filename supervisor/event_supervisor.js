@@ -1,10 +1,37 @@
+const logme = require('logme');
 const dotenv = require('dotenv-json')({ path:'../.env.json' });
 
-const { DynamoDBClient, ScanCommand, QueryCommand, paginateScan } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const config = require('../config');
+
+
+async function updatePropertyForItems(archive_id_list) {
+    const dynamoClient = new DynamoDBClient(config.getAWSConfig());
+    const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+    logme.debug('update fetched field for '+archive_id_list);
+    const updatePromises = archive_id_list.map(id => {
+        const updateParams = {
+            TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
+            Key: { 'archive_id': id },
+            UpdateExpression: `set #p = :v`,
+            ExpressionAttributeNames: { '#p': 'fetched' },
+            ExpressionAttributeValues: { ':v': 'true' },
+        };
+
+        return docClient.send(new UpdateCommand(updateParams));
+    });
+
+    try {
+        await Promise.all(updatePromises);
+        console.log('All items updated successfully');
+    } catch (error) {
+        console.error('Error updating items:', error);
+    }
+}
 
 // Job only has a couple of pieces of work to do
 //   1. read out all unfinished work from Dynamo
@@ -53,7 +80,6 @@ async function job_handler()  {
         }
 
     } while( lastEvaluatedKey )
-//    console.dir(groupedItems);
 
     // run through the group and create a single task to be pushed into SQS
     // for each owner / activity pair. 
@@ -95,7 +121,12 @@ async function job_handler()  {
 
                 // Send the message to SQS
                 const result = await sqsClient.send(new SendMessageCommand(params));
-                console.log(`Message sent for key ${key}:`, result.MessageId);
+                logme.debug(`Message sent for key ${key}:`, result.MessageId);
+
+                // toggle the fetched flag to mark all of these items as processed
+                const archiveIds = items.map(item => item.archive_id.S);
+                updatePropertyForItems(archiveIds);
+
             }
         }
         return { statusCode: 200, body: "Process completed successfully" };

@@ -14,11 +14,9 @@ async function createRawWebhookTable(table_name) {
         TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
         KeySchema: [
           { AttributeName: 'archive_id', KeyType: 'HASH' }, // Primary key
-          { AttributeName: 'fetched', KeyType: 'RANGE' } // Sort key
         ],
         AttributeDefinitions: [
           { AttributeName: 'archive_id', AttributeType: 'S' },
-          { AttributeName: 'fetched', AttributeType: 'S' } // Adjust type based on your "processed" property
         ],
         ProvisionedThroughput: {
           ReadCapacityUnits: 5,
