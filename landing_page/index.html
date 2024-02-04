@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Strava Archiver</title>
+    <!-- Add any additional head elements here (e.g., CSS, Meta tags) -->
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Strava Archiver Service</h1>
+        <p>Please authorize our application to access your Strava data.</p>
+        
+        <!-- Authorization Link/Button -->
+        <a href="https://www.strava.com/oauth/authorize?client_id=119075&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=activity:read_all" class="auth-button">Authorize Access</a>
+
+        <!-- Display any messages or errors -->
+        <p id="message"></p>
+    </div>
+
+    <script>
+        // example link created
+        // https://www.strava.com/oauth/authorize
+        //    ?client_id=119075
+        //    &response_type=code
+        //    &redirect_uri=http%3A%2F%2Flocalhost%2Fexchange_token
+        //    &approval_prompt=force
+        //    &scope=read_all
+        document.addEventListener("DOMContentLoaded", function() {
+            const env = window.location.hostname.includes("dev") ? "dev" 
+                    : "prod";
+
+            const clientId = {
+                dev: "119075",
+                prod: "fixme"
+            };
+
+            // Build the dynamic URL
+            const redirectUri = encodeURIComponent('http://localhost/exchange_token');//(`https://auth-${env}.myapp.com/exchange_token`);
+            const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId[env]}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=read_all`;
+
+            // Set the href for the authorization button/link
+            document.querySelector(".auth-button").setAttribute("href", authUrl);
+        });
+    </script>
+</body>
+</html>
