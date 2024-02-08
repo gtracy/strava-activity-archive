@@ -1,20 +1,32 @@
 'use strict';
-var logme = require('logme');
+const cors = require('cors');
 var morgan = require('morgan');
-
 var express = require('express');
 var bodyParser = require('body-parser');
-var routes = require('./webhook'); 
 
-
-// create the express web application server
 var app = express();
 app.use(morgan('combined'));
-app.use(bodyParser.json()); // Parse JSON requests
-app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({
+    origin: '*',
+    methods: 'GET',
+    allowedHeaders: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    preflightContinue: true
+}));
 
 // Routes
-routes(app); 
+require('./routes/webhook')(app); 
+require('./routes/oauth')(app);
+
+
+// API backstop
+app.get('*', (req,res) => {
+    res.json({
+        "status": -1,
+        "description": 'unsupported endpoint'
+    });
+});
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -22,8 +34,4 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-// start the web application server
-var port = process.env.PORT || 8088;
-app.listen(port, () => {
-    logme.info('Server started on port ' + port);
-});
+module.exports = app;

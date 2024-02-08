@@ -2,6 +2,10 @@
 
 module.exports = {
 
+    getPort : function getPort() {
+        return 3304
+    },
+
     getEnv : function getEnv() {
         if( process.env.NODE_ENV === 'prod' ) {
             return process.env.NODE_ENV;
@@ -19,7 +23,7 @@ module.exports = {
         }
 
         return({
-            useLevel: level,
+            level: level,
             autoLogging: false
         });
     },
