@@ -32,10 +32,13 @@
                 dev: "119075",
                 prod: "fixme"
             };
+            const redirectUri = {
+                dev: 'http://localhost:3304/exchange_token',
+                prod: 'fixme/exchange_token'
+            }
 
             // Build the dynamic URL
-            const redirectUri = encodeURIComponent('http://localhost/exchange_token');//(`https://auth-${env}.myapp.com/exchange_token`);
-            const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId[env]}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=read_all`;
+            const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId[env]}&response_type=code&redirect_uri=${redirectUri[env]}&approval_prompt=force&scope=read_all`;
 
             // Set the href for the authorization button/link
             document.querySelector(".auth-button").setAttribute("href", authUrl);

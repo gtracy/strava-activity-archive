@@ -46,7 +46,7 @@ async function createUserTable(table_name) {
         { AttributeName: 'athlete_id', KeyType: 'HASH' },
       ],
       AttributeDefinitions: [
-        { AttributeName: 'athlete_id', AttributeType: 'S' },
+        { AttributeName: 'athlete_id', AttributeType: 'N' },
       ],
       ProvisionedThroughput: {
         ReadCapacityUnits: 5,
@@ -62,7 +62,7 @@ async function createUserTable(table_name) {
     } else {
       console.error("Error", err);
     }
-}
+  }
 }
 
 
@@ -75,7 +75,7 @@ async function createOAuthTokenTable(table_name) {
         { AttributeName: 'athlete_id', KeyType: 'HASH' },
       ],
       AttributeDefinitions: [
-        { AttributeName: 'athlete_id', AttributeType: 'S' },
+        { AttributeName: 'athlete_id', AttributeType: 'N' },
       ],
       ProvisionedThroughput: {
         ReadCapacityUnits: 5,
