@@ -11,7 +11,7 @@ async function createRawWebhookTable(table_name) {
     const client = new DynamoDBClient(config.getAWSConfig());
 
     const params = {
-        TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
+        TableName: table_name,
         KeySchema: [
           { AttributeName: 'archive_id', KeyType: 'HASH' }, // Primary key
         ],
@@ -23,18 +23,81 @@ async function createRawWebhookTable(table_name) {
           WriteCapacityUnits: 5
         }
     };
-      
-    console.dir(params);
 
     try {
         const data = await client.send(new CreateTableCommand(params));
-        console.log("Table Created", data);
-    } catch (err) {
-        console.error("Error", err);
+        console.log("Table Created ", table_name);
+      } catch (err) {
+        if( err.name == 'ResourceInUseException' ) {
+          console.log(table_name + " already exists");
+        } else {
+          console.error("Error", err);
+        }
     }
 }
 
+
+async function createUserTable(table_name) {
+  const client = new DynamoDBClient(config.getAWSConfig());
+
+  const params = {
+      TableName: table_name,
+      KeySchema: [
+        { AttributeName: 'athlete_id', KeyType: 'HASH' },
+      ],
+      AttributeDefinitions: [
+        { AttributeName: 'athlete_id', AttributeType: 'S' },
+      ],
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 5,
+        WriteCapacityUnits: 5
+      }
+  };
+  try {
+      const data = await client.send(new CreateTableCommand(params));
+      console.log("Table Created ", table_name);
+  } catch (err) {
+    if( err.name == 'ResourceInUseException' ) {
+      console.log(table_name + " already exists");
+    } else {
+      console.error("Error", err);
+    }
+}
+}
+
+
+async function createOAuthTokenTable(table_name) {
+  const client = new DynamoDBClient(config.getAWSConfig());
+
+  const params = {
+      TableName: table_name,
+      KeySchema: [
+        { AttributeName: 'athlete_id', KeyType: 'HASH' },
+      ],
+      AttributeDefinitions: [
+        { AttributeName: 'athlete_id', AttributeType: 'S' },
+      ],
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 5,
+        WriteCapacityUnits: 5
+      }
+  };
+
+  try {
+      const data = await client.send(new CreateTableCommand(params));
+      console.log("Table Created ", table_name);
+  } catch (err) {
+    if( err.name == 'ResourceInUseException' ) {
+      console.log(table_name + " already exists");
+    } else {
+      console.error("Error", err);
+    }
+}
+}
+
 (async () => {
-    createRawWebhookTable(process.env.DYNAMO_RAW_WEBHOOK_TABLE);
+    await createRawWebhookTable(process.env.DYNAMO_RAW_WEBHOOK_TABLE);
+    await createUserTable(process.env.DYNAMO_USER_TABLE);
+    await createOAuthTokenTable(process.env.DYNAMO_OAUTH_TOKEN_TABLE);
 })();
 
