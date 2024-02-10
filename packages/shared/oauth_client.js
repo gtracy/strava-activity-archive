@@ -104,7 +104,7 @@ class OAuthClient {
             item.Item['athlete_id'] = athlete_id;
             item.Item['access_token'] = access_token;
             item.Item['refresh_token'] = refresh_token;
-            item.Item['expires_at'] = expires_atXXX;
+            item.Item['expires_at'] = expires_at;
             logger.info('insert oauth tokens');
             logger.debug(JSON.stringify(item, null, 2));
 

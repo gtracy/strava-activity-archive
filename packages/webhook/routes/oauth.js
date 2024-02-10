@@ -5,7 +5,7 @@ const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
 const config = require('@strava/shared/config');
 const logger = require('pino')(config.getLogConfig());
-const OAuthClient = require('../oauth_client');
+const OAuthClient = require('@strava/shared/oauth_client');
 
 const oauthClient = new OAuthClient(
     process.env.STRAVA_CLIENT_ID,
