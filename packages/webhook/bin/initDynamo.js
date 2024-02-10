@@ -1,4 +1,4 @@
-const dotenv = require('dotenv-json')({ path:'../.env.json' });
+const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CreateTableCommand } = require("@aws-sdk/client-dynamodb");

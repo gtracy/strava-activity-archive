@@ -1,0 +1,24 @@
+{
+    "name": "strava-activity-archive",
+    "description": "an archive a data pipeline utility for strava activities",
+    "author": "greg tracy",
+    "version": "0.1.0",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "init": "node bin/initDynamo.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gtracy/strava-activity-archive.git"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gtracy/strava-activity-archive/issues"
+    },
+    "homepage": "https://github.com/gtracy/strava-activity-archive#readme",
+    "dependencies": {
+    }
+}

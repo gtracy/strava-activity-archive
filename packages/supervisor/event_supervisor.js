@@ -1,11 +1,11 @@
 const logme = require('logme');
-const dotenv = require('dotenv-json')({ path:'../.env.json' });
+const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
 const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
-const config = require('../config');
+const config = require('@strava/shared/config');
 
 
 async function updatePropertyForItems(archive_id_list) {

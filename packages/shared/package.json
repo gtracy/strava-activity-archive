@@ -1,0 +1,24 @@
+{
+    "name": "@strava/shared",
+    "description": "shared components used by multiple strava archiving packages",
+    "author": "greg tracy",
+    "version": "0.1.0",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gtracy/strava-activity-archive.git"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gtracy/strava-activity-archive/issues"
+    },
+    "homepage": "https://github.com/gtracy/strava-activity-archive#readme",
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.485.0",
+        "@aws-sdk/lib-dynamodb": "^3.485.0",
+        "axios": "^1.6.7",
+        "pino-http": "^9.0.0"
+    }
+}

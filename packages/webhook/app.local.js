@@ -1,6 +1,6 @@
 'use strict'
 
-const config = require('../config');
+const config = require('@strava/shared/config');
 const app = require('./app');
 const logger = require('pino')(config.getLogConfig());
 

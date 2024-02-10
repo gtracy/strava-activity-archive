@@ -2,7 +2,7 @@
 
 const axios = require('axios');
 
-const config = require('../config');
+const config = require('@strava/shared/config');
 const logger = require('pino')(config.getLogConfig());
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");

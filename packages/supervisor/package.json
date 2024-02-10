@@ -1,11 +1,10 @@
 {
-    "name": "strava-activity-archive",
-    "description": "a strava activity webhook",
+    "name": "@strava/supervisor",
+    "description": "a lambda job that inspects and consolidates new webhook events",
     "author": "greg tracy",
     "version": "0.1.0",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "init": "node bin/initDynamo.js"
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
         "type": "git",
@@ -17,15 +16,11 @@
     },
     "homepage": "https://github.com/gtracy/strava-activity-archive#readme",
     "dependencies": {
+        "@strava/shared": "^0.1.0",
         "@aws-sdk/client-dynamodb": "^3.485.0",
+        "@aws-sdk/client-sqs": "^3.485.0",
         "@aws-sdk/lib-dynamodb": "^3.485.0",
-        "axios": "^1.6.7",
-        "cors": "^2.8.5",
         "dotenv-json": "^1.0.0",
-        "express": "^4.18.2",
-        "logme": "0.3.8",
-        "morgan": "^1.10.0",
-        "pino-http": "^9.0.0",
-        "uuid": "^9.0.1"
+        "logme": "0.3.8"
     }
 }

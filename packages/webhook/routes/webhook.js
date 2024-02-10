@@ -1,12 +1,12 @@
 const logme = require('logme');
-const dotenv = require('dotenv-json')({ path:'../.env.json' });
+const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
 const { v4: uuidv4 } = require('uuid');
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
-const config = require('../../config');
+const config = require('@strava/shared/config');
 console.dir(config.getAWSConfig());
 
 

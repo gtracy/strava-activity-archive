@@ -3,7 +3,7 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
-const config = require('../../config');
+const config = require('@strava/shared/config');
 const logger = require('pino')(config.getLogConfig());
 const OAuthClient = require('../oauth_client');
 
