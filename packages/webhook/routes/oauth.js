@@ -40,11 +40,10 @@ async function saveAthlete(athlete_obj) {
         // Insert the item into the DynamoDB table
         const data = await docClient.send(new PutCommand(item));
         logger.debug("Item inserted successfully:");
-        return true;
     } catch (error) {
         logger.error("Error inserting item into DynamoDB:", JSON.stringify(error));
         console.dir(error);
-        return false;
+        throw error;
     }
   };
   
@@ -54,7 +53,6 @@ module.exports = async function(app) {
         try {
             const code = req.query.code;
             const athlete = await oauthClient.exchangeCodeForToken(code, process.env.STRAVA_REDIRECT_URI);
-            /** FIXME: Catch errors if the tokens don't store or API call fails **/
             
             // stash the athlete details
             await saveAthlete(athlete);
