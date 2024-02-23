@@ -1,3 +1,5 @@
+'use strict';
+
 const logme = require('logme');
 const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
@@ -46,6 +48,7 @@ module.exports = function(app) {
           logme.error('challenge: '+ challenge + ' / verify_token: '+verify_token);
           res.status(400).send('Invalid signature');
         } else {
+          logme.info('new webhook registered: '+challenge);
           res.status(200).json({ 'hub.challenge': challenge });
         }
     });

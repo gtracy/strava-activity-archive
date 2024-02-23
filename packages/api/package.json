@@ -1,5 +1,5 @@
 {
-    "name": "@strava/webhook",
+    "name": "@strava/api",
     "description": "public API components for the archiver",
     "author": "greg tracy",
     "version": "0.1.0",
