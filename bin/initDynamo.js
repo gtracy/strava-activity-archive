@@ -1,11 +1,14 @@
-const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
+const dotenv = require('dotenv-json')({ path:'./packages/shared/.env.json' });
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CreateTableCommand } = require("@aws-sdk/client-dynamodb");
 
-const config = require('../../config');
+const config = require('@strava/shared/config');
 console.dir(config.getAWSConfig());
 
+// TODO - evaluate whether we should elevate these scripts
+//        to the top-level of the monorepo. nothing works 
+//        without them
 
 async function createRawWebhookTable(table_name) {
     const client = new DynamoDBClient(config.getAWSConfig());
