@@ -6,9 +6,6 @@ const { CreateTableCommand } = require("@aws-sdk/client-dynamodb");
 const config = require('@strava/shared/config');
 console.dir(config.getAWSConfig());
 
-// TODO - evaluate whether we should elevate these scripts
-//        to the top-level of the monorepo. nothing works 
-//        without them
 
 async function createRawWebhookTable(table_name) {
     const client = new DynamoDBClient(config.getAWSConfig());

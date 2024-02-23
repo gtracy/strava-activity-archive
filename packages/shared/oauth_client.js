@@ -175,29 +175,6 @@ class OAuthClient {
             return false;
         }
     }
-
-    // TODO - implment deauthorization method to support cases where athletes remove access
-    async deauthorize() {
-        var endpoint = 'https://www.strava.com/oauth/deauthorize'
-      
-        var url = endpoint
-        var options = {
-          url: url,
-          method: 'POST',
-          json: true,
-          // We want to consider some 30x responses valid as well
-          // 'simple' would only consider 2xx responses successful
-          simple: false,
-          headers: {
-            Authorization: 'Bearer ' + this.access_token
-          }
-        }
-      
-        // Promise.resolve is used to convert the promise returned
-        // to a Bluebird promise
-        // asCallback is used to support both Promise and callback-based APIs
-        //return Promise.resolve(request(options)).asCallback(done)
-      }
       
 }
 
