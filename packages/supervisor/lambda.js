@@ -1,4 +1,6 @@
-const logme = require('logme');
+'use strict';
+
+const logger = require('pino')(config.getLogConfig());
 const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
 const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
@@ -12,7 +14,7 @@ async function updatePropertyForItems(archive_id_list) {
     const dynamoClient = new DynamoDBClient(config.getAWSConfig());
     const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-    logme.debug('update fetched field for '+archive_id_list);
+    logger.debug('update fetched field for '+archive_id_list);
     const updatePromises = archive_id_list.map(id => {
         const updateParams = {
             TableName: process.env.DYNAMO_RAW_WEBHOOK_TABLE,
@@ -39,7 +41,6 @@ async function updatePropertyForItems(archive_id_list) {
 //
 async function job_handler()  {
     const dynamoClient = new DynamoDBClient(config.getAWSConfig());
-    const docClient = DynamoDBDocumentClient.from(dynamoClient);
     const sqsClient = new SQSClient(config.getAWSConfig(true));
     let lastEvaluatedKey = undefined;
     const groupedItems = {};
@@ -96,24 +97,24 @@ async function job_handler()  {
                 const deleteItems = items.filter(item => item.aspect_type.S === "delete");
                 if( deleteItems.length > 0 ) {
                     const item = deleteItems[0];
-                    console.log('***** DELETE *****');
+                    logger.info('***** DELETE *****');
                     messageBody = {
-                        owner_id: item.owner_id.N,
-                        object_id: item.object_id.N,
+                        athlete_id: item.owner_id.N,
+                        activity_id: item.object_id.N,
                         archive_id: item.archive_id.S,
                         aspect_type: 'delete'
                     };
                 } else {
                     const item = items[0];
                     messageBody = {
-                        owner_id: item.owner_id.N,
-                        object_id: item.object_id.N,
+                        athlete_id: item.owner_id.N,
+                        activity_id: item.object_id.N,
                         archive_id: item.archive_id.S,
                         aspect_type: item.aspect_type.S
                     };
                 }
 
-                console.dir(messageBody);
+                logger.info('new activity task created: ',messageBody);
                 const params = {
                     QueueUrl: config.getSQSConfig(),
                     MessageBody: JSON.stringify(messageBody),
@@ -121,7 +122,7 @@ async function job_handler()  {
 
                 // Send the message to SQS
                 const result = await sqsClient.send(new SendMessageCommand(params));
-                logme.debug(`Message sent for key ${key}:`, result.MessageId);
+                logger.debug(`Message sent for key ${key}:`, result.MessageId);
 
                 // toggle the fetched flag to mark all of these items as processed
                 const archiveIds = items.map(item => item.archive_id.S);
