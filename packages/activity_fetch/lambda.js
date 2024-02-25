@@ -42,12 +42,10 @@ async function job_handler(event)  {
         }
     }
 };
-
-
 exports.handler = job_handler;
 
 // this enables you to run the script directly from the CLI
-// e.g. node lambda.js 123
+// e.g. node lambda.js
 //
 if (require.main === module) {
     logger.debug('running function from the CLI');

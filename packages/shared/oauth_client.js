@@ -16,10 +16,12 @@ class OAuthClient {
         this.authUrl = authUrl; // URL to get authorization code
         this.tokenUrl = tokenUrl; // URL to exchange code for token
         this.apiUrl = apiUrl; // Base URL for API calls
+        this.athlete_id = undefined;
 
         // cache the access and refresh tokens
         this.access_token = undefined;
         this.refresh_token = undefined;
+        this.expires_at = undefined;
     }
 
     // Activate a specific athlete by retrieving the stored tokens for an athlete
@@ -42,10 +44,24 @@ class OAuthClient {
                 throw new Error('Missing athlete auth tokens');
             } else {
                 const athlete_tokens = data.Items[0];
-                console.dir(athlete_tokens);
+
                 this.access_token = athlete_tokens.access_token;
                 this.refresh_token = athlete_tokens.refresh_token;
+                this.expires_at = athlete_tokens.expires_at;
+                this.athlete_id = athlete_id;
                 logger.info('successfully found the athlete tokens '+this.access_token);
+
+                // pre-emptively check to see if our auth token is already expired
+                //
+                const now = new Date();
+                const expiration_date = new Date(this.expires_at);
+                if( now > expiration_date ) {
+                    logger.info('OAuth: auth token is expired. initiating refresh');
+                    logger.debug('local time is: '+now);
+                    logger.debug('token expires at: '+expiration_date);
+                    await this.refreshAccessToken(this.refresh_token);
+                }
+                
             }
         } catch (error) {
             console.error('Error querying DynamoDB:', error);
@@ -64,12 +80,12 @@ class OAuthClient {
                 redirect_uri: redirectUri,
                 grant_type: 'authorization_code',
             });
-            const { access_token, refresh_token, expires_in, athlete } = tokenResponse.data;
-
-            // Store tokens in Dynamo and then cache locally
-            await this.storeTokens(athlete.id,access_token,refresh_token,expires_in);
-            this.access_token = access_token;
-            this.refresh_token = refresh_token;
+            console.dir(tokenResponse.data);
+            const { access_token, refresh_token, expires_at, athlete } = tokenResponse.data;
+            if( athlete.id !== this.athlete_id ) {
+                throw new Error('OAuth mismatch in athlete ID. Local instance is '+this.athlete_id+' token exchange produced '+athlete.id)
+            }
+            await this.storeTokens(athlete.id,access_token,refresh_token,expires_at);
             return athlete;
         } catch (error) {
             console.error('Error exchanging code for token:', error);
@@ -79,18 +95,22 @@ class OAuthClient {
 
     // Refresh the access token
     async refreshAccessToken(refreshToken) {
+        if( !this.athlete_id ) {
+            throw new Error("OAuth: missing athlete id on token refresh");
+        }
+
         const params = {
             client_id: this.clientId,
             client_secret: this.clientSecret,
-            refresh_token: this.refreshToken,
+            refresh_token: refreshToken,
             grant_type: 'refresh_token',
         };
         console.dir(params);
         try {
             const response = await axios.post(this.tokenUrl, params);
 
-            const { access_token, refresh_token, expires_in } = response.data;
-            await this.storeTokens(access_token, refresh_token, expires_in);
+            const { access_token, refresh_token, expires_at } = response.data;
+            await this.storeTokens(this.athlete_id,access_token,refresh_token,expires_at);
             return access_token;
         } catch (error) {
             console.error('Error refreshing token: ',error.message);
@@ -102,11 +122,20 @@ class OAuthClient {
     // Make an API call
     async makeApiCall(endpoint, method = 'GET', data = null) {
         if( !this.access_token || !this.refresh_token ) {
-            throw new Error("missing oauth tokens");
+            throw new Error("OAuth: missing oauth tokens on API call");
         }
-        console.debug('OAuth API call: ',method,`${this.apiUrl}/${endpoint}`,data);
-        // TODO - skip to the refresh token step if we no the 
-        // access token is expired already
+        logger.debug(method,`${this.apiUrl}/${endpoint}`,data,'OAuth API call: ');
+
+        // pre-emptively check to see if our auth token is already expired
+        //
+        const now = new Date();
+        const expiration_date = new Date(this.expires_at);
+        if( now > expiration_date ) {
+            logger.info('OAuth: auth token is expired. initiating refresh');
+            logger.debug('local time is: '+now);
+            logger.debug('token expires at: '+expiration_date);
+            await this.refreshAccessToken(this.refresh_token);
+        }
 
         try {
             const response = await axios({
@@ -152,7 +181,7 @@ class OAuthClient {
             item.Item['athlete_id'] = athlete_id;
             item.Item['access_token'] = access_token;
             item.Item['refresh_token'] = refresh_token;
-            item.Item['expires_at'] = expires_at;
+            item.Item['expires_at'] = expires_at*1000;
             logger.info('insert oauth tokens');
             logger.debug(JSON.stringify(item, null, 2));
 
@@ -160,6 +189,7 @@ class OAuthClient {
             const data = await docClient.send(new PutCommand(item));
             this.access_token = access_token;
             this.refresh_token = refresh_token;
+            this.expires_at = expires_at*1000;
             logger.info("OAuth tokens inserted successfully:");
             return true;
         } catch (error) {
