@@ -41,8 +41,7 @@ async function saveAthlete(athlete_obj) {
         const data = await docClient.send(new PutCommand(item));
         logger.debug("Item inserted successfully:");
     } catch (error) {
-        logger.error("Error inserting item into DynamoDB:", JSON.stringify(error));
-        console.dir(error);
+        logger.error(JSON.stringify(error),"Error inserting item into DynamoDB:");
         throw error;
     }
   };
@@ -58,8 +57,7 @@ module.exports = async function(app) {
             await saveAthlete(athlete);
             res.send('Tokens stored successfully');
         } catch (error) {
-            console.error('Error handling OAuth redirect:', error);
-            console.dir(error);
+            logger.error(error,'Error handling OAuth redirect:');
             res.status(500).send('An error occurred');
         }
     });

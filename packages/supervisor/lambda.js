@@ -1,13 +1,12 @@
 'use strict';
 
+const config = require('@strava/shared/config');
 const logger = require('pino')(config.getLogConfig());
 const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 
 const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
-
-const config = require('@strava/shared/config');
 
 
 async function updatePropertyForItems(archive_id_list) {
@@ -29,9 +28,9 @@ async function updatePropertyForItems(archive_id_list) {
 
     try {
         await Promise.all(updatePromises);
-        console.log('All items updated successfully');
+        logger.info('All items updated successfully');
     } catch (error) {
-        console.error('Error updating items:', error);
+        logger.error(error,'Error updating items:');
     }
 }
 
@@ -64,7 +63,6 @@ async function job_handler()  {
 
             // Process the items returned by the current page
             response.Items.forEach(item => {
-                console.dir(item);
                 // the key aggregates all webhook events for a single activity
                 // for each user. 
                 const key = `${item.object_id.N}-${item.owner_id.N}`;
@@ -76,7 +74,7 @@ async function job_handler()  {
             lastEvaluatedKey = response.LastEvaluatedKey;
 
         } catch (error) {
-            console.error("Error:", error);
+            logger.error(error,"Error:");
             return { statusCode: 500, body: "Internal Server Error" };
         }
 
@@ -132,7 +130,7 @@ async function job_handler()  {
         }
         return { statusCode: 200, body: "Process completed successfully" };
     } catch (error) {
-        console.error("Error:", error);
+        logger.error(error,"Error:", );
         return { statusCode: 500, body: "Internal Server Error" };
     }
         

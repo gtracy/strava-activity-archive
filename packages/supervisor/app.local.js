@@ -1,4 +1,4 @@
-const supervisor = require('./event_supervisor');
+const supervisor = require('./lambda');
 (async () => {
     supervisor.handler();
 })();

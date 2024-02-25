@@ -58,7 +58,6 @@ async function storeActivity(activity_data) {
     } else {
         throw new Error('storeActivity: invalid activity data object. missing id');
     }
-    console.dir(activity_data);
 
     const item = {
         TableName: process.env.DYNAMO_GOLD_ACTIVITY_TABLE,

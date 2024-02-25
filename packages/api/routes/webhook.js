@@ -1,15 +1,13 @@
 'use strict';
 
-const logme = require('logme');
 const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
+const config = require('@strava/shared/config');
+const logger = require('pino')(config.getLogConfig());
 
 const { v4: uuidv4 } = require('uuid');
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
-
-const config = require('@strava/shared/config');
-console.dir(config.getAWSConfig());
 
 
 async function dynamoPutObject(item) {
@@ -21,15 +19,15 @@ async function dynamoPutObject(item) {
       // add-on a unique identifier for the record
       item.Item['archive_id'] = uuidv4();
       item.Item['fetched'] = "false";
-      logme.debug('insert new webhook object');
-      logme.debug(JSON.stringify(item, null, 2));
+      logger.debug('insert new webhook object');
+      logger.debug(JSON.stringify(item, null, 2));
 
       // Insert the item into the DynamoDB table
       const data = await docClient.send(new PutCommand(item));
-      logme.debug("Item inserted successfully:");
+      logger.debug("Item inserted successfully:");
       return true;
   } catch (error) {
-      console.error("Error inserting item into DynamoDB:", error);
+      logging.error(error,"Error inserting item into DynamoDB:");
       return false;
   }
 };
@@ -44,11 +42,11 @@ module.exports = function(app) {
         const challenge = req.query['hub.challenge'];
         const verify_token = req.query['hub.verify_token'];
         if( verify_token !== process.env.STRAVA_VERIFY_TOKEN ) {
-          logme.error('Failed to validate request signature');
-          logme.error('challenge: '+ challenge + ' / verify_token: '+verify_token);
+          logger.error('Failed to validate request signature');
+          logger.error('challenge: '+ challenge + ' / verify_token: '+verify_token);
           res.status(400).send('Invalid signature');
         } else {
-          logme.info('new webhook registered: '+challenge);
+          logger.info('new webhook registered: '+challenge);
           res.status(200).json({ 'hub.challenge': challenge });
         }
     });
@@ -66,13 +64,13 @@ module.exports = function(app) {
     // }
     //
     app.post('/webhook', async (req, res) => {
-        logme.debug(JSON.stringify(req.body));
-        logme.debug(JSON.stringify(req.headers));
+        logger.debug(JSON.stringify(req.body));
+        logger.debug(JSON.stringify(req.headers));
         try {
           // Verify the request signature (replace with your actual verification logic)
           const parsedSubscriptionID = parseInt(process.env.STRAVA_SUBSCRIPTION_ID);
           if (req.body.subscription_id !== parsedSubscriptionID) {
-            logme.error('failed to validate the webhook request '+req.body.subscription_id+' against configuration '+process.env.STRAVA_SUBSCRIPTION_ID);
+            logger.error('failed to validate the webhook request '+req.body.subscription_id+' against configuration '+process.env.STRAVA_SUBSCRIPTION_ID);
             return res.status(400).send('Invalid signature');
           }
       
@@ -88,7 +86,7 @@ module.exports = function(app) {
             res.status(500).send('Internal server error');
           }
         } catch (error) {
-          console.error('Error processing webhook:', error);
+          logger.error('Error processing webhook:', error);
           res.status(500).send('Internal server error');
         }
       });

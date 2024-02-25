@@ -64,7 +64,7 @@ class OAuthClient {
                 
             }
         } catch (error) {
-            console.error('Error querying DynamoDB:', error);
+            logger.error(error,'Error querying DynamoDB:');
             throw error;
         }
             
@@ -80,7 +80,6 @@ class OAuthClient {
                 redirect_uri: redirectUri,
                 grant_type: 'authorization_code',
             });
-            console.dir(tokenResponse.data);
             const { access_token, refresh_token, expires_at, athlete } = tokenResponse.data;
             if( athlete.id !== this.athlete_id ) {
                 throw new Error('OAuth mismatch in athlete ID. Local instance is '+this.athlete_id+' token exchange produced '+athlete.id)
@@ -88,7 +87,7 @@ class OAuthClient {
             await this.storeTokens(athlete.id,access_token,refresh_token,expires_at);
             return athlete;
         } catch (error) {
-            console.error('Error exchanging code for token:', error);
+            logger.error(error,'Error exchanging code for token:');
             throw error;
         }
     }
@@ -105,7 +104,7 @@ class OAuthClient {
             refresh_token: refreshToken,
             grant_type: 'refresh_token',
         };
-        console.dir(params);
+
         try {
             const response = await axios.post(this.tokenUrl, params);
 
@@ -113,8 +112,7 @@ class OAuthClient {
             await this.storeTokens(this.athlete_id,access_token,refresh_token,expires_at);
             return access_token;
         } catch (error) {
-            console.error('Error refreshing token: ',error.message);
-            console.dir(error.response.data);
+            logger.error(error,'Error refreshing token: ');
             throw error;
         }
     }
