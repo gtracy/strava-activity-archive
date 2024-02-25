@@ -4,6 +4,9 @@ const dotenv = require('dotenv-json')({ path:'../shared/.env.json' });
 const config = require('@strava/shared/config');
 const logger = require('pino')(config.getLogConfig());
 
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+
 const axios = require('axios');
 const Strava = require('@strava/shared/strava');
 
@@ -32,17 +35,55 @@ async function job_handler(event)  {
             // Fetch the activity data
             const activityData = await strava.fetchStravaActivity(String(activity_id));
             logger.info(activityData.name,"Fetched activity data:");
+            await storeActivity(activityData);
 
             // Process the activity data as needed
             // ...
 
         } catch (error) {
             logger.error("Error processing message:", error);
-            //throw(error);
+            throw(error);
         }
     }
 };
 exports.handler = job_handler;
+
+async function storeActivity(activity_data) {
+    const client = new DynamoDBClient(config.getAWSConfig());
+    const docClient = DynamoDBDocumentClient.from(client);
+
+    if (activity_data.hasOwnProperty('id')) {
+        activity_data['activity_id'] = activity_data['id'];
+        delete activity_data['id'];
+    } else {
+        throw new Error('storeActivity: invalid activity data object. missing id');
+    }
+    console.dir(activity_data);
+
+    const item = {
+        TableName: process.env.DYNAMO_GOLD_ACTIVITY_TABLE,
+        Item: activity_data
+    };
+
+    try {
+        // Insert the item into the DynamoDB table
+        logger.info('insert activity data into Dynamo');
+        const data = await docClient.send(new PutCommand(item));
+        logger.info("Activity inserted successfully:");
+        return true;
+    } catch (error) {
+        //logger.error("Error inserting item into DynamoDB: ",error);
+        logger.error({ 
+            error: {
+              message: error.message, 
+              stack: error.stack,
+              // Include any other properties you need
+            } 
+          }, "Error inserting item into DynamoDB");
+          
+        return false;
+    }
+}
 
 // this enables you to run the script directly from the CLI
 // e.g. node lambda.js

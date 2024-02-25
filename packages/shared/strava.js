@@ -32,9 +32,8 @@ class Strava {
             throw Error("Missing athlete_id");
         }
 
-        console.debug('fetch activity: ',activity_id);
-        const endpoint = `activities/${activity_id}`;
         try {
+            const endpoint = `activities/${activity_id}`;
             const data = await this.oauthClient.makeApiCall(endpoint);
             return data;
         } catch (error) {

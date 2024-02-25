@@ -124,7 +124,7 @@ class OAuthClient {
         if( !this.access_token || !this.refresh_token ) {
             throw new Error("OAuth: missing oauth tokens on API call");
         }
-        logger.debug(method,`${this.apiUrl}/${endpoint}`,data,'OAuth API call: ');
+        logger.debug('OAuth API call: ',`${this.apiUrl}/${endpoint}`);
 
         // pre-emptively check to see if our auth token is already expired
         //
@@ -168,7 +168,6 @@ class OAuthClient {
 
     // Store tokens securely in DynamoDB
     async storeTokens(athlete_id, access_token, refresh_token, expires_at) {
-        // Initialize the DynamoDB client
         const client = new DynamoDBClient(config.getAWSConfig());
         const docClient = DynamoDBDocumentClient.from(client);
         const item = {
