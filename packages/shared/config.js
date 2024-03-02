@@ -28,8 +28,8 @@ module.exports = {
         });
     },
 
-    getAWSConfig : function getAWSConfig(sqs) {
-        if( process.env.NODE_ENV === 'prod' || sqs ) {
+    getAWSConfig : function getAWSConfig(cloud_sqs) {
+        if( process.env.NODE_ENV === 'prod' || cloud_sqs ) {
             return {
                 region : process.env.AWS_REGION,
                 access_id : process.env.AWS_ACCESS_ID,
@@ -42,13 +42,31 @@ module.exports = {
         }
     },
 
-    getSQSConfig : function getSQSConfig() {
+    getSQSConfig : function getSQSConfig(queue) {
         // we always use cloud queues (nothing local) but there
         // are different queues for prod and test
         if( process.env.NODE_ENV === 'prod' ) {
-            return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_PROD;
+            switch (queue) {
+                case 'activity_fetch':
+                    return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_PROD;
+                    break;
+                case 'supervisor':
+                    return process.env.SQS_STRAVA_SUPERVISOR_JOBS_PROD;
+                    break;
+                default:
+                    return 'MISSING_SQS_CONFIG';
+            }
         } else {
-            return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_TEST;
+            switch (queue) {
+                case 'activity_fetch':
+                    return process.env.SQS_STRAVA_ACTIVITY_FETCH_JOBS_TEST;
+                    break;
+                case 'supervisor':
+                    return process.env.SQS_STRAVA_SUPERVISOR_JOBS_TEST;
+                    break;
+                default:
+                    return 'MISSING_SQS_CONFIG';
+            }
         }
     }
 

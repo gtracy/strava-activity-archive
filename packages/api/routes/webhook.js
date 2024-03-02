@@ -8,7 +8,24 @@ const { v4: uuidv4 } = require('uuid');
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
+// We have a supervisor job that aggregates all webhook events 
+// for a single Strava activity. This function will push a 
+// message into a delayed queue that triggers that supervisor task
+//
+// By definition, we will create multiple triggers, but the supervisor
+// will discard them if all of the work has already been completed
+//
+async function triggerSupervisor(msg) {
+    const sqsClient = new SQSClient(config.getAWSConfig(true));
+    logger.info(msg,'trigger the supervisor task worker via SQS: ');
+    const params = {
+        QueueUrl: config.getSQSConfig('supervisor'),
+        MessageBody: JSON.stringify(msg),
+    };
+    const result = await sqsClient.send(new SendMessageCommand(params));
+}
 
 async function dynamoPutObject(item) {
   // Initialize the DynamoDB client
@@ -52,7 +69,7 @@ module.exports = function(app) {
     });
     
     // validate the request and go straight to Dynamo with the object
-    // 
+    // this is (example) what the webhook body looks like:
     // {
     //   aspect_type: 'create',
     //   event_time: 1704129726,
@@ -81,10 +98,13 @@ module.exports = function(app) {
           };
           const success = await dynamoPutObject(item);
           if( success ) {
+            // trigger the downstream data processor
+            await triggerSupervisor({activity_id:req.body.object_id});
             res.status(200).send('Webhook processed successfully');
           } else {
             res.status(500).send('Internal server error');
           }
+
         } catch (error) {
           logger.error('Error processing webhook:', error);
           res.status(500).send('Internal server error');

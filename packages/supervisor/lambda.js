@@ -114,7 +114,7 @@ async function job_handler()  {
 
                 logger.info('new activity task created: ',messageBody);
                 const params = {
-                    QueueUrl: config.getSQSConfig(),
+                    QueueUrl: config.getSQSConfig('activity_fetch'),
                     MessageBody: JSON.stringify(messageBody),
                 };
 
